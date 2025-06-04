@@ -6,6 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab 9</title>
+  <script src="config.js"></script>
 
   <style>
     button {
@@ -89,19 +90,148 @@
 
   <script>
     let form = document.querySelector('form');
+
+    class CalculationError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'CalculationError';
+      }
+    } 
+
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.log('Global error caught:', {
+        message,
+        source,
+        lineno,
+        colno,
+        error
+      });
+      return true;
+    };
+
+    window.addEventListener('error', (event) => {
+      console.log('Error event caught:', event.error);
+    });
+
     form.addEventListener('submit', e => {
       e.preventDefault();
       let output = document.querySelector('output');
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+      try {
+        if (!firstNum || !secondNum) {
+          throw new CalculationError('Please enter both numbers');
+        }
+        if (operator === '/' && secondNum === '0') {
+          throw new CalculationError('Division by zero is not allowed');
+        }
+        const result = eval(`${firstNum} ${operator} ${secondNum}`);
+        if (isNaN(result)) {
+          throw new CalculationError('Invalid calculation result');
+        }
+        output.innerHTML = result;
+      } catch (error) {
+        if (error instanceof CalculationError) {
+          output.innerHTML = `Calculation Error: ${error.message}`;
+        } else {
+          output.innerHTML = 'An unexpected error occurred';
+        }
+        console.error('Calculation error:', error);
+      } finally {
+        console.log('Calculation attempt completed.');
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
-    // Start your code here
-    // You may move this JS to another file if you wish
+    errorBtns[0].addEventListener('click', () => {
+      console.log('This is a console.log demo');
+    });
+
+    errorBtns[1].addEventListener('click', () => {
+      console.error('This is a console.error demo', new Error('Sample error'));
+    });
+
+    errorBtns[2].addEventListener('click', () => {
+      console.count('Button clicked');
+    });
+
+    errorBtns[3].addEventListener('click', () => {
+      console.warn('This is a console.warn demo');
+    });
+
+    errorBtns[4].addEventListener('click', () => {
+      console.assert(2 + 2 === 5, 'This assertion will fail because 2 + 2 is not 5');
+    });
+
+    errorBtns[5].addEventListener('click', () => {
+      console.clear();
+    });
+
+    errorBtns[6].addEventListener('click', () => {
+      console.dir(document.querySelector('form'));
+    });
+
+    errorBtns[7].addEventListener('click', () => {
+      console.dirxml(document.querySelector('form'));
+    });
+
+    errorBtns[8].addEventListener('click', () => {
+      console.group('Group Demo');
+      console.log('Inside group 1');
+      console.log('More info in group 1');
+    });
+
+    errorBtns[9].addEventListener('click', () => {
+      console.groupEnd();
+    });
+
+    errorBtns[10].addEventListener('click', () => {
+      const data = [
+        { name: 'John', age: 30, city: 'New York' },
+        { name: 'Jane', age: 25, city: 'Los Angeles' },
+        { name: 'Bob', age: 35, city: 'Chicago' }
+      ];
+      console.table(data);
+    });
+
+    errorBtns[11].addEventListener('click', () => {
+      console.time('Operation Timer');
+    });
+
+    errorBtns[12].addEventListener('click', () => {
+      console.timeEnd('Operation Timer');
+    });
+
+    errorBtns[13].addEventListener('click', () => {
+      function first() {
+        second();
+      }
+      function second() {
+        third();
+      }
+      function third() {
+        console.trace('Trace Demo');
+      }
+      first();
+    });
+
+    errorBtns[14].addEventListener('click', () => {
+      boom();
+    });
+
+    const trackJsScript = document.createElement('script');
+    trackJsScript.src = 'https://cdn.trackjs.com/agent/v3/latest/t.js';
+    trackJsScript.async = true;
+    trackJsScript.onload = function() {
+      window.TrackJS.install({
+        token: config.trackJsToken,
+        application: "lab9-demo"
+      });
+    };
+    document.head.appendChild(trackJsScript);
   </script>
 </body>
 
